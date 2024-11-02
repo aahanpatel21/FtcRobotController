@@ -151,7 +151,7 @@ public class TeleOp202425 extends LinearOpMode {
            } else if ( gamepad2.dpad_up) {
                // 360 degrees = 537.7 * 5 ticks
                // 90 degrees = 537.7 * 5 / (360 / 90) ticks
-               armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 45)));
+               armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 90)));
            }
            
             // armRotator.setPower(armRotatorPower);
