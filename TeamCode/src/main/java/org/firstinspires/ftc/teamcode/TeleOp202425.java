@@ -66,7 +66,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: Omni Linear OpMode", group="Linear OpMode")
+@TeleOp(name="BlueTopHats TeleOp2024", group="Linear OpMode")
 
 public class TeleOp202425 extends LinearOpMode {
 
