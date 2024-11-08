@@ -109,7 +109,7 @@ public class TeleOp202425 extends LinearOpMode {
         armRotator.setTargetPosition(0);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        extendableArm.setDirection(DcMotor.Direction.FORWARD);
+        extendableArm.setDirection(DcMotor.Direction.REVERSE);
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -153,7 +153,16 @@ public class TeleOp202425 extends LinearOpMode {
                 // 360 degrees = 537.7 * 5 ticks
                 // 90 degrees = 537.7 * 5 / (360 / 90) ticks
                 armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 65)));
+            } else if (gamepad2.dpad_left) {
+                // 360 degrees = 537.7 * 5 ticks
+                // 90 degrees = 537.7 * 5 / (360 / 90) ticks
+                armRotator.setTargetPosition((int)(537.7 * 5 / (360 / -45)));
+            } else if (gamepad2.dpad_right) {
+                // 360 degrees = 537.7 * 5 ticks
+                // 90 degrees = 537.7 * 5 / (360 / 90) ticks
+                armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 90)));
             }
+
 
             // armRotator.setPower(armRotatorPower);
             extendableArm.setPower(extendableArmPower);
