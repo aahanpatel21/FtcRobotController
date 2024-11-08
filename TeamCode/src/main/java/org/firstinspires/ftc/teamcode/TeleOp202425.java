@@ -66,7 +66,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="BlueTopHats TeleOp2024", group="Linear OpMode")
+@TeleOp(name="2024 Teleop", group="Linear OpMode")
 
 public class TeleOp202425 extends LinearOpMode {
 
@@ -104,11 +104,12 @@ public class TeleOp202425 extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         armRotator.setDirection(DcMotor.Direction.REVERSE);
-        
+
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armRotator.setTargetPosition(0);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        
-        extendableArm.setDirection(DcMotor.Direction.REVERSE);
+
+        extendableArm.setDirection(DcMotor.Direction.FORWARD);
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -121,7 +122,7 @@ public class TeleOp202425 extends LinearOpMode {
         armRotator.setTargetPosition(0);
         armRotator.setPower(armPower);
         while (opModeIsActive()) {
-            
+
             double max;
             double hatUp = gamepad1.dpad_up ? 1.0 : 0.0;
             double hatDown = gamepad1.dpad_down ? 1.0 : 0.0;
@@ -140,27 +141,27 @@ public class TeleOp202425 extends LinearOpMode {
             double rightBackPower  = axial + lateral - yaw;
             // double armRotatorPower = 0.6*-gamepad2.left_stick_y;
             double extendableArmPower = -gamepad2.right_stick_y;
-           if (gamepad2.a) {
+            if (gamepad2.a) {
                 extendableArmPower = 1;
             }
-           if (gamepad2.b) {
-               extendableArmPower = -1;
-           }
-           if(gamepad2.dpad_down){
-               armRotator.setTargetPosition(0);
-           } else if ( gamepad2.dpad_up) {
-               // 360 degrees = 537.7 * 5 ticks
-               // 90 degrees = 537.7 * 5 / (360 / 90) ticks
-               armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 45)));
-           }
-           
+            if (gamepad2.b) {
+                extendableArmPower = -1;
+            }
+            if(gamepad2.dpad_down){
+                armRotator.setTargetPosition(0);
+            } else if (gamepad2.dpad_up) {
+                // 360 degrees = 537.7 * 5 ticks
+                // 90 degrees = 537.7 * 5 / (360 / 90) ticks
+                armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 65)));
+            }
+
             // armRotator.setPower(armRotatorPower);
             extendableArm.setPower(extendableArmPower);
-           if (gamepad2.x){
-               ElapsedTime timer = new ElapsedTime();
-               telemetry.addLine();
-           }
-           
+            if (gamepad2.x){
+                ElapsedTime timer = new ElapsedTime();
+                telemetry.addLine();
+            }
+
 
 
             // Normalize the values so no wheel power exceeds 100%
@@ -175,8 +176,8 @@ public class TeleOp202425 extends LinearOpMode {
                 leftBackPower   /= max;
                 rightBackPower  /= max;
             }
-            
-            
+
+
 
             // This is test code:
             //
@@ -191,7 +192,7 @@ public class TeleOp202425 extends LinearOpMode {
 
 
             /*
-  
+
             leftFrontPower  = gamepad1.x ? 1.0 : 0.0;  // X gamepad
             leftBackPower   = gamepad1.a ? 1.0 : 0.0;  // A gamepad
             rightFrontPower = gamepad1.y ? 1.0 : 0.0;  // Y gamepad
@@ -203,13 +204,13 @@ public class TeleOp202425 extends LinearOpMode {
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
-           
+
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.addData("Arm Position", "%d", armRotator.getCurrentPosition());
             telemetry.update();
-        
+
         }
     }}
