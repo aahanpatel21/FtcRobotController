@@ -155,6 +155,7 @@ public class TeleOp202425 extends LinearOpMode {
                 armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 65)));
             }
 
+
             // armRotator.setPower(armRotatorPower);
             extendableArm.setPower(extendableArmPower);
             if (gamepad2.x){
