@@ -33,6 +33,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.PwmControl;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executors;
@@ -78,6 +80,7 @@ public class TeleOp202425 extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private DcMotor armRotator = null;
     private DcMotor extendableArm = null;
+    private ServoImplEx servo = null;
     @Override
     public void runOpMode() {
 
@@ -89,6 +92,7 @@ public class TeleOp202425 extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "m1");
         armRotator = hardwareMap.get(DcMotor.class, "m4");
         extendableArm = hardwareMap.get(DcMotor.class, "m5");
+        servo = hardwareMap.get(ServoImplEx.class, "s1");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -104,10 +108,13 @@ public class TeleOp202425 extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         armRotator.setDirection(DcMotor.Direction.REVERSE);
+        // MAKE SERVO A DCMOTOR
 
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setTargetPosition(0);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
 
         extendableArm.setDirection(DcMotor.Direction.REVERSE);
         // Wait for the game to start (driver presses START)
@@ -147,29 +154,26 @@ public class TeleOp202425 extends LinearOpMode {
             if (gamepad2.b) {
                 extendableArmPower = -1;
             }
+            if (gamepad2.x) {
+                servo.setPosition(1);
+            }
+            if (gamepad2.y) {
+                servo.setPosition(0);
+            }
             if(gamepad2.dpad_down){
+                telemetry.addData("Arm State", "Down");
                 armRotator.setTargetPosition(0);
             } else if (gamepad2.dpad_up) {
+                telemetry.addData("Arm State", "Up");
+
                 // 360 degrees = 537.7 * 5 ticks
                 // 90 degrees = 537.7 * 5 / (360 / 90) ticks
-                armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 65)));
-            } else if (gamepad2.dpad_left) {
-                // 360 degrees = 537.7 * 5 ticks
-                // 90 degrees = 537.7 * 5 / (360 / 90) ticks
-                armRotator.setTargetPosition((int)(537.7 * 5 / (360 / -45)));
-            } else if (gamepad2.dpad_right) {
-                // 360 degrees = 537.7 * 5 ticks
-                // 90 degrees = 537.7 * 5 / (360 / 90) ticks
-                armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 90)));
+                armRotator.setTargetPosition((int)(1400 * 5 / (360 / 90)));
             }
 
 
             // armRotator.setPower(armRotatorPower);
             extendableArm.setPower(extendableArmPower);
-            if (gamepad2.x){
-                ElapsedTime timer = new ElapsedTime();
-                telemetry.addLine();
-            }
 
 
 
