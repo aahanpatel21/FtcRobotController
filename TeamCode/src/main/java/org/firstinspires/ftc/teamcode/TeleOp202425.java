@@ -80,7 +80,7 @@ public class TeleOp202425 extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private DcMotor armRotator = null;
     private DcMotor extendableArm = null;
-    private DcMotor servo = null;
+    private ServoImplEx servo = null;
     @Override
     public void runOpMode() {
 
@@ -92,7 +92,7 @@ public class TeleOp202425 extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "m1");
         armRotator = hardwareMap.get(DcMotor.class, "m4");
         extendableArm = hardwareMap.get(DcMotor.class, "m5");
-        servo = hardwareMap.get(DcMotor.class, "s1");
+        servo = hardwareMap.get(ServoImplEx.class, "s1");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -108,13 +108,13 @@ public class TeleOp202425 extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         armRotator.setDirection(DcMotor.Direction.REVERSE);
-        servo.setDirection(DcMotor.Direction.REVERSE);
+        // MAKE SERVO A DCMOTOR
 
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setTargetPosition(0);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-//        servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
+        servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
 
         extendableArm.setDirection(DcMotor.Direction.FORWARD);
         // Wait for the game to start (driver presses START)
@@ -155,10 +155,10 @@ public class TeleOp202425 extends LinearOpMode {
                 extendableArmPower = -1;
             }
             if (gamepad2.x) {
-                servo.setPower(1);
+                servo.setPosition(1);
             }
             if (gamepad2.y) {
-                servo.setPower(0);
+                servo.setPosition(0);
             }
             if(gamepad2.dpad_down){
                 telemetry.addData("Arm State", "Down");
@@ -168,7 +168,7 @@ public class TeleOp202425 extends LinearOpMode {
 
                 // 360 degrees = 537.7 * 5 ticks
                 // 90 degrees = 537.7 * 5 / (360 / 90) ticks
-                armRotator.setTargetPosition((int)(537.7 * 5 / (360 / 65)));
+                armRotator.setTargetPosition((int)(1400 * 5 / (360 / 90)));
             }
 
 
