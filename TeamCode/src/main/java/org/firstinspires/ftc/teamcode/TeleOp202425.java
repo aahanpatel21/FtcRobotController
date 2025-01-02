@@ -30,11 +30,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.ServoImpl;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.PwmControl;
-import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executors;
@@ -68,7 +70,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="2024 Teleop", group="Linear OpMode")
+@TeleOp(name="TeleOp 2024/25", group="Linear OpMode")
 
 public class TeleOp202425 extends LinearOpMode {
 
@@ -80,10 +82,56 @@ public class TeleOp202425 extends LinearOpMode {
     private DcMotor rightBackDrive = null;
     private DcMotor armRotator = null;
     private DcMotor extendableArm = null;
-    private ServoImplEx servo = null;
+    private ServoImplEx intake = null;
+    private ServoImplEx wrist = null;
+
+    public void setArmTargetPositionDegrees(double angle) {
+        // 360 degrees = 1425.1 * 5 ticks
+        // 90 degrees = 1425.1 * 5 / (360 / 90) ticks
+        armRotator.setTargetPosition((int) (1425.1 * 5 / (360 / angle)));
+    }
+
+    public void setWristTargetPositionDegrees(double angle) {
+        double angleOffsetFront = 60;
+        double angleOffsetBackward = 30;
+        double angleMax = 270-angleOffsetBackward-angleOffsetFront;
+        if (angle > (angleMax)) {
+            angle = angleMax;
+        }
+        if (angle < 0) {
+            angle = 0;
+        }
+        wrist.setPosition(angleOffsetFront/270 + (angle)/270);
+    }
+    public void setIntakeTargetPositionDegrees(double angle) {
+        double angleOffsetFront = 60;
+        double angleOffsetBackward = 150;
+        double angleMax = 270-angleOffsetBackward-angleOffsetFront;
+        if (angle > (angleMax)) {
+            angle = angleMax;
+        }
+        if (angle < 0) {
+            angle = 0;
+        }
+        intake.setPosition(angleOffsetFront/270 + (angle)/270);
+    }
+    public void setArmExtensionTargetPositionMM(double length) {
+        // 360 degrees = 537.7 ticks
+        // 60t pulley - 2mm pitch
+        // 360 degrees = 60 * 2mm = 120mm extension
+        // Hard limit is 650mm
+
+        if (length > 675) {
+            length = 675;
+        }
+
+        extendableArm.setTargetPosition((int)(537.7 * length/120));
+    }
+
+
     @Override
     public void runOpMode() {
-
+        int extendableArmLimit = 4500;
         // Initialize the hardware variables. Note that the strings used here must correspond
         // to the names assigned during the robot configuration step on the DS or RC devices.
         leftFrontDrive  = hardwareMap.get(DcMotor.class, "m3");
@@ -92,7 +140,8 @@ public class TeleOp202425 extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "m1");
         armRotator = hardwareMap.get(DcMotor.class, "m4");
         extendableArm = hardwareMap.get(DcMotor.class, "m5");
-        servo = hardwareMap.get(ServoImplEx.class, "s1");
+        intake = hardwareMap.get(ServoImplEx.class,  "s1");
+        wrist = hardwareMap.get(ServoImplEx.class,  "s2");
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -108,26 +157,35 @@ public class TeleOp202425 extends LinearOpMode {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         armRotator.setDirection(DcMotor.Direction.REVERSE);
-        // MAKE SERVO A DCMOTOR
 
-        armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // Run until the end of the match (driver presses STOP)
+        double armPower = 1.0;
         armRotator.setTargetPosition(0);
+        armRotator.setPower(armPower);
+        armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+<<<<<<< Updated upstream
         servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
 
         extendableArm.setDirection(DcMotor.Direction.REVERSE);
+=======
+        double extendableArmPower = 1.0;
+        int extendableArmPosition = 0;
+        extendableArm.setTargetPosition(extendableArmPosition);
+        extendableArm.setDirection(DcMotor.Direction.REVERSE);
+        extendableArm.setPower(extendableArmPower);
+        extendableArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extendableArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+>>>>>>> Stashed changes
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
         runtime.reset();
-
-        // run until the end of the match (driver presses STOP)
-        double armPower = 0.5;
-        armRotator.setTargetPosition(0);
-        armRotator.setPower(armPower);
+        double driveSlower = 1.0;
+        boolean slowMode = false;
         while (opModeIsActive()) {
 
             double max;
@@ -140,40 +198,78 @@ public class TeleOp202425 extends LinearOpMode {
             double axial   = -gamepad1.left_stick_y + hatUp - hatDown;  // Note: pushing stick forward gives negative value
             double lateral =  gamepad1.left_stick_x + hatRight - hatLeft;
             double yaw     =  gamepad1.right_stick_x;
+
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
-            double leftFrontPower  = axial + lateral + yaw;
-            double rightFrontPower = axial - lateral - yaw;
-            double leftBackPower   = axial - lateral + yaw;
-            double rightBackPower  = axial + lateral - yaw;
+
+            driveSlower = 1.0 - gamepad1.right_trigger;
+            double leftFrontPower  = driveSlower*(axial + lateral + yaw);
+            double rightFrontPower = driveSlower*(axial - lateral - yaw);
+            double leftBackPower   = driveSlower*(axial - lateral + yaw);
+            double rightBackPower  = driveSlower*(axial + lateral - yaw);
+
             // double armRotatorPower = 0.6*-gamepad2.left_stick_y;
-            double extendableArmPower = -gamepad2.right_stick_y;
-            if (gamepad2.a) {
-                extendableArmPower = 1;
-            }
-            if (gamepad2.b) {
-                extendableArmPower = -1;
-            }
-            if (gamepad2.x) {
-                servo.setPosition(1);
-            }
-            if (gamepad2.y) {
-                servo.setPosition(0);
-            }
+            int limitChanger = 1;
+
+
             if(gamepad2.dpad_down){
-                telemetry.addData("Arm State", "Down");
-                armRotator.setTargetPosition(0);
+                setArmExtensionTargetPositionMM(100);
+                setWristTargetPositionDegrees(60);
+                setArmTargetPositionDegrees(-30);
             } else if (gamepad2.dpad_up) {
-                telemetry.addData("Arm State", "Up");
 
-                // 360 degrees = 537.7 * 5 ticks
-                // 90 degrees = 537.7 * 5 / (360 / 90) ticks
-                armRotator.setTargetPosition((int)(1400 * 5 / (360 / 90)));
+                setArmExtensionTargetPositionMM(675);
+                setArmTargetPositionDegrees(85);
+                setWristTargetPositionDegrees(90);
+
+            } else if (gamepad2.dpad_left) {
+                setArmExtensionTargetPositionMM(250);
+                sleep(500);
+                setArmTargetPositionDegrees(65);
+
+            } else if (gamepad2.dpad_right) {
+                setArmExtensionTargetPositionMM(400);
+                sleep(500);
+                setArmTargetPositionDegrees(-9);
+                wrist.setPosition(0.55);
             }
-
 
             // armRotator.setPower(armRotatorPower);
-            extendableArm.setPower(extendableArmPower);
+
+            if (gamepad2.x){
+                //intakePower = 1;
+                intake.setPosition(0.75);
+
+
+            }
+            if (gamepad2.y) {
+                //intakePower = -1;
+                intake.setPosition(0);
+            }
+
+            if (gamepad2.left_bumper){
+                //wristreverse();
+                //intakePower = 1;
+                wrist.setPosition(0.55);
+            }
+
+            if (gamepad2.right_bumper) {
+                //wristforward();
+                //intakePower = -1;
+                wrist.setPosition(1);
+            }
+
+            if(gamepad2.a){
+                setArmExtensionTargetPositionMM(0);
+                sleep(500);
+                setWristTargetPositionDegrees(90);
+                setArmTargetPositionDegrees(0);
+
+            }
+            if(gamepad2.b){
+                setArmExtensionTargetPositionMM(0);
+            }
+
 
 
 
@@ -217,12 +313,14 @@ public class TeleOp202425 extends LinearOpMode {
             rightFrontDrive.setPower(rightFrontPower);
             leftBackDrive.setPower(leftBackPower);
             rightBackDrive.setPower(rightBackPower);
-
+            //intake.setPower(intakePower);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.addData("Arm Position", "%d", armRotator.getCurrentPosition());
+            telemetry.addData("Extend Position", "%d", extendableArm.getCurrentPosition());
+            telemetry.addData("Slow Mode", slowMode);
             telemetry.update();
 
         }
