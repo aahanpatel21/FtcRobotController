@@ -165,11 +165,6 @@ public class TeleOp202425 extends LinearOpMode {
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-<<<<<<< Updated upstream
-        servo.setPwmRange(new PwmControl.PwmRange(500, 2500));
-
-        extendableArm.setDirection(DcMotor.Direction.REVERSE);
-=======
         double extendableArmPower = 1.0;
         int extendableArmPosition = 0;
         extendableArm.setTargetPosition(extendableArmPosition);
@@ -177,7 +172,6 @@ public class TeleOp202425 extends LinearOpMode {
         extendableArm.setPower(extendableArmPower);
         extendableArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extendableArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
->>>>>>> Stashed changes
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
         telemetry.update();
