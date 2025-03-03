@@ -195,8 +195,11 @@ public class TeleOp202425 extends LinearOpMode {
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.
-
-            driveSlower = 1.0 - gamepad1.right_trigger;
+            if (gamepad1.right_trigger == 1.0) {
+                driveSlower = 0.6;
+            } else {
+                driveSlower = 1.0;
+            }
             double leftFrontPower  = driveSlower*(axial + lateral + yaw);
             double rightFrontPower = driveSlower*(axial - lateral - yaw);
             double leftBackPower   = driveSlower*(axial - lateral + yaw);
@@ -224,7 +227,7 @@ public class TeleOp202425 extends LinearOpMode {
             } else if (gamepad2.dpad_right) {
                 setArmExtensionTargetPositionMM(400);
                 sleep(500);
-                setArmTargetPositionDegrees(-9);
+                setArmTargetPositionDegrees(-7);
                 wrist.setPosition(0.55);
             }
 
@@ -240,11 +243,22 @@ public class TeleOp202425 extends LinearOpMode {
                 //intakePower = -1;
                 intake.setPosition(0);
             }
-
+            if (gamepad2.left_stick_button) {
+                setArmExtensionTargetPositionMM(200);
+                sleep(500);
+                setWristTargetPositionDegrees(0);
+                setArmTargetPositionDegrees(0);
+            }
+            if (gamepad2.right_stick_button) {
+                setArmExtensionTargetPositionMM(175);
+                sleep(500);
+                setWristTargetPositionDegrees(75);
+                setArmTargetPositionDegrees(70);
+            }
             if (gamepad2.left_bumper){
                 //wristreverse();
                 //intakePower = 1;
-                wrist.setPosition(0.55);
+                wrist.setPosition(0);
             }
 
             if (gamepad2.right_bumper) {
